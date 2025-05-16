@@ -1,0 +1,7 @@
+.venv/
+.idea/
+
+data/*
+data_split/*
+
+__pycache__/
