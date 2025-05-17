@@ -2,6 +2,9 @@
 .idea/
 
 data/*
+!data/*.txt
 data_split/*
+test/*
+!test/*.txt
 
 __pycache__/
