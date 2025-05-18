@@ -1,22 +1,32 @@
-import torch.nn as nn
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
-INPUT_SIZE     = 96              
-NUM_CLASSES    = 7
+NUM_CLASSES = 7
 
 class CNNClassifier(nn.Module):
     def __init__(self, num_classes=NUM_CLASSES):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 32, 3, padding=1)
+        self.bn1   = nn.BatchNorm2d(32)
         self.conv2 = nn.Conv2d(32, 64, 3, padding=1)
-        self.pool  = nn.MaxPool2d(2,2)
-        self.drop  = nn.Dropout(0.25)
-        self.fc1   = nn.Linear(64 * (INPUT_SIZE//4) * (INPUT_SIZE//4), 128)
-        self.fc2   = nn.Linear(128, num_classes)
+        self.bn2   = nn.BatchNorm2d(64)
+        self.conv3 = nn.Conv2d(64, 128, 3, padding=1)
+        self.bn3   = nn.BatchNorm2d(128)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.drop = nn.Dropout(0.3)
+
+        self.global_pool = nn.AdaptiveAvgPool2d((1, 1))
+
+        self.fc1 = nn.Linear(128, 256)
+        self.fc2 = nn.Linear(256, num_classes)
 
     def forward(self, x):
-        x = self.pool(torch.relu(self.conv1(x)))  # -> (32, INPUT/2, INPUT/2)
-        x = self.pool(torch.relu(self.conv2(x)))  # -> (64, INPUT/4, INPUT/4)
-        x = x.flatten(1)
-        x = self.drop(torch.relu(self.fc1(x)))
+        x = self.pool(F.relu(self.bn1(self.conv1(x))))
+        x = self.pool(F.relu(self.bn2(self.conv2(x))))
+        x = self.pool(F.relu(self.bn3(self.conv3(x))))
+        x = self.global_pool(x)     # → (B, 128, 1, 1)
+        x = x.view(x.size(0), -1)   # → (B, 128)
+
+        x = self.drop(F.relu(self.fc1(x)))
         return self.fc2(x)

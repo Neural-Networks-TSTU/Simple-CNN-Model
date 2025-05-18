@@ -5,12 +5,10 @@ from predict import load_model, preprocess, predict
 from pathlib import Path
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = load_model("checkpoints/best.pth", device)
+model, classes = load_model("checkpoints/best.pth", device)
 
 df = pd.read_csv("test/labels.csv")
-
-correct = 0
-total = 0
+correct = total = 0
 
 for _, row in df.iterrows():
     filename = row["filename"]
@@ -18,10 +16,9 @@ for _, row in df.iterrows():
     img_path = Path("test/images") / filename
 
     tensor = preprocess(str(img_path)).to(device)
+    label, prob = predict(model, tensor, device, classes)
 
-    label, prob = predict(model, tensor, device)
     total += 1
-
     if label == expected:
         correct += 1
     else:
