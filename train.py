@@ -12,14 +12,15 @@ from cnn_model import CNNClassifier
 
 DATA_DIR       = "data_split"           
 BATCH_SIZE     = 32
-NUM_EPOCHS     = 20
+NUM_EPOCHS     = 25
 LEARNING_RATE  = 1e-3
-PATIENCE       = 5               # эпох без улучшения для ранней остановки
+PATIENCE       = 5 
 DELTA          = 1e-4 
 INPUT_SIZE     = 96              
-NUM_CLASSES    = 7           # минимальный прирост accuracy
+NUM_CLASSES    = 7
 SAVE_DIR       = "checkpoints"
 DEVICE         = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 os.makedirs(SAVE_DIR, exist_ok=True)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
@@ -27,9 +28,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(mes
 
 
 class Trainer:
-    def __init__(self, model, device):
+    def __init__(self, model, device, classes):
         self.model   = model.to(device)
         self.device  = device
+        self.classes = classes
         self.crit    = nn.CrossEntropyLoss()
         self.opt     = optim.Adam(self.model.parameters(), lr=LEARNING_RATE)
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.opt, mode='max', factor=0.5, patience=2)
@@ -89,8 +91,11 @@ class Trainer:
 
     def save(self, epoch, is_best=False):
         fn = Path(SAVE_DIR) / ("best.pth" if is_best else f"epoch_{epoch}.pth")
-        torch.save(self.model.state_dict(), fn)
-        logging.info(f"Saved model: {fn}")
+        torch.save({
+            'model_state': self.model.state_dict(),
+            'classes': self.classes
+        }, fn)
+        logging.info(f"Saved model with classes: {self.classes} → {fn}")
 
     def fit(self, train_loader, val_loader):
         for epoch in range(1, NUM_EPOCHS+1):
@@ -122,6 +127,13 @@ def main():
         transforms.Resize((INPUT_SIZE, INPUT_SIZE)),
         transforms.ToTensor()
     ])
+
+    train_dir = os.path.join(DATA_DIR, "train")
+    classes = sorted([
+        d for d in os.listdir(train_dir)
+        if os.path.isdir(os.path.join(train_dir, d))
+    ])
+
     train_ds = datasets.ImageFolder(os.path.join(DATA_DIR, "train"), transform=tf)
     val_ds   = datasets.ImageFolder(os.path.join(DATA_DIR, "val"),   transform=tf)
 
@@ -129,7 +141,7 @@ def main():
     val_loader   = DataLoader(val_ds,   batch_size=BATCH_SIZE, shuffle=False, num_workers=4, pin_memory=True)
 
     model   = CNNClassifier()
-    trainer = Trainer(model, DEVICE)
+    trainer = Trainer(model, DEVICE, classes)
     trainer.fit(train_loader, val_loader)
 
 
