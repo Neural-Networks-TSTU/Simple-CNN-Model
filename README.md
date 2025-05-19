@@ -19,7 +19,7 @@ The model will be saved in .pth format for later use.
 ## Visualization of the training process
 During training, a graph of the change in the loss function and accuracy for the training and validation samples is generated:
 <div align="center">
-  <img src="checkpoints/training_curves.png" alt="График потерь" width="800"/>
+  <img src="checkpoints/training_curves_cnn.png" alt="График потерь" width="800"/>
 </div>
 
 ## Model Checking Tools

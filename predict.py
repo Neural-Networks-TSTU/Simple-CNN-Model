@@ -1,7 +1,8 @@
 import torch
 from PIL import Image
 from torchvision import transforms
-from cnn_model import CNNClassifier
+from models.cnn_model import CNNClassifier
+from models.lite_cnn_model import LightCNNClassifier
 import argparse
 
 THRESHOLD = 0.6
@@ -9,7 +10,7 @@ INPUT_SIZE = 96
 
 def load_model(path, device):
     chkpt = torch.load(path, map_location=device)
-    model = CNNClassifier()
+    model = LightCNNClassifier()
     model.load_state_dict(chkpt['model_state'])
     model.to(device).eval()
     return model, chkpt['classes']

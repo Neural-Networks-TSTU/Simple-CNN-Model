@@ -8,7 +8,8 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from torchmetrics.classification import MulticlassAccuracy
 from tqdm import tqdm
-from cnn_model import CNNClassifier
+from models.cnn_model import CNNClassifier
+from models.lite_cnn_model import LightCNNClassifier
 import matplotlib.pyplot as plt
 
 DATA_DIR       = "data_split"           
@@ -181,7 +182,7 @@ def main():
     train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True,  num_workers=4, pin_memory=True)
     val_loader   = DataLoader(val_ds,   batch_size=BATCH_SIZE, shuffle=False, num_workers=4, pin_memory=True)
 
-    model   = CNNClassifier()
+    model   = LightCNNClassifier()
     trainer = Trainer(model, DEVICE, classes)
     trainer.fit(train_loader, val_loader)
 
