@@ -11,6 +11,7 @@ from tqdm import tqdm
 from models.cnn_model import CNNClassifier
 from models.lite_cnn_model import LightCNNClassifier
 import matplotlib.pyplot as plt
+import argparse
 
 DATA_DIR       = "data_split"           
 BATCH_SIZE     = 32
@@ -164,6 +165,10 @@ class Trainer:
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Train CNN model')
+    parser.add_argument('--model-type', choices=['lightcnn', 'cnn'], required=True)
+    args = parser.parse_args()
+
     tf = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
         transforms.Resize((INPUT_SIZE, INPUT_SIZE)),
@@ -182,7 +187,10 @@ def main():
     train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True,  num_workers=4, pin_memory=True)
     val_loader   = DataLoader(val_ds,   batch_size=BATCH_SIZE, shuffle=False, num_workers=4, pin_memory=True)
 
-    model   = LightCNNClassifier()
+    if args.model_type == 'lightcnn':
+        model = LightCNNClassifier()
+    elif args.model_type == 'cnn':
+        model = CNNClassifier()
     trainer = Trainer(model, DEVICE, classes)
     trainer.fit(train_loader, val_loader)
 
