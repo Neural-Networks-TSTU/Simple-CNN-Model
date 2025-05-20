@@ -10,7 +10,7 @@ INPUT_SIZE = 96
 
 def load_model(path, device):
     chkpt = torch.load(path, map_location=device)
-    model = LightCNNClassifier()
+    model = CNNClassifier()
     model.load_state_dict(chkpt['model_state'])
     model.to(device).eval()
     return model, chkpt['classes']
@@ -36,8 +36,8 @@ def predict(model, tensor, device, classes):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--image", default="data/ACB_MO_1/ACB_MO_1_00005.jpg")
-    parser.add_argument("--model", default="checkpoints/best_3_layers_ligth_model.pth")
+    parser.add_argument("--image", default="1.png")
+    parser.add_argument("--model", default="checkpoints/best.pth")
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

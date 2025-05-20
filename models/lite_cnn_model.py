@@ -28,7 +28,7 @@ class SEBlock(nn.Module):
 
 
 class LightCNNClassifier(nn.Module):
-    def __init__(self, num_classes=7):
+    def __init__(self, num_classes=8):
         super().__init__()
         # SepConv: 1→32→64→128
         self.sep1 = SepConv(1,  32)

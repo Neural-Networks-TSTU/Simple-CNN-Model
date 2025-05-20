@@ -2,10 +2,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-NUM_CLASSES = 7
 
 class CNNClassifier(nn.Module):
-    def __init__(self, num_classes=NUM_CLASSES):
+    def __init__(self, num_classes=8):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 32, 3, padding=1)
         self.bn1   = nn.BatchNorm2d(32)
