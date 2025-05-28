@@ -23,6 +23,14 @@ def set_seed(seed):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
+def mixup_data(x, y, alpha=0.4):
+        if alpha <= 0:
+            return x, y, None, 1.0
+        lam = np.random.beta(alpha, alpha)
+        idx = torch.randperm(x.size(0)).to(x.device)
+        mixed_x = lam * x + (1 - lam) * x[idx]
+        return mixed_x, y, y[idx], lam
+
 set_seed(42)
 
 DATA_DIR       = "data_split"
@@ -31,7 +39,7 @@ NUM_EPOCHS     = 20
 LEARNING_RATE  = 1e-3
 PATIENCE       = 5 
 DELTA          = 0.005
-INPUT_SIZE     = 128
+INPUT_SIZE     = 64
 NUM_CLASSES    = 7
 SAVE_DIR       = "checkpoints"
 DEVICE         = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -96,7 +104,7 @@ class Trainer:
         self.model   = model.to(device)
         self.device  = device
         self.classes = classes
-        self.crit    = nn.CrossEntropyLoss()
+        self.crit = nn.CrossEntropyLoss(label_smoothing=0.1)
         if optimizer_type.lower() == 'adam':
             self.opt = optim.Adam(self.model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
         elif optimizer_type.lower() == 'sgd':
@@ -118,9 +126,10 @@ class Trainer:
         pbar = tqdm(loader, desc="  train", leave=False)
         for imgs, labels in pbar:
             imgs, labels = imgs.to(self.device), labels.to(self.device)
+            imgs, y_a, y_b, lam = mixup_data(imgs, labels, alpha=0.4)
             self.opt.zero_grad()
             logits = self.model(imgs)
-            loss = self.crit(logits, labels)
+            loss = lam * self.crit(logits, y_a) + (1 - lam) * self.crit(logits, y_b)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
             self.opt.step()
@@ -277,9 +286,12 @@ def main():
     elif args.model_type == 'lightcnn':
         from models.lite_cnn_model import LightCNNClassifier
         model = LightCNNClassifier()
-    elif args.model_type in ['cnn', 'cnnv2']:
+    elif args.model_type in ['cnn']:
         from models.cnn_model import CNNClassifier
         model = CNNClassifier()
+    elif args.model_type == 'cnnv2':
+        from models.cnn_improved import ImprovedCNN
+        model = ImprovedCNN()
     else:
         raise ValueError("Invalid model type")
 

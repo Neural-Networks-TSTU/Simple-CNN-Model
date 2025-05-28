@@ -4,7 +4,7 @@ from torchvision import transforms, models
 import argparse
 
 THRESHOLD = 0.6
-INPUT_SIZE = 224
+INPUT_SIZE = 64
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def load_model(path, device, model_type):
@@ -18,6 +18,9 @@ def load_model(path, device, model_type):
     elif model_type == 'cnn':
         from models.cnn_model import CNNClassifier
         model = CNNClassifier()
+    elif model_type == 'cnnv2':
+        from models.cnn_improved import ImprovedCNN
+        model = ImprovedCNN()
     elif model_type == 'lightcnn':
         from models.lite_cnn_model import LightCNNClassifier
         model = LightCNNClassifier()
@@ -52,7 +55,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Inference script for image classification")
     parser.add_argument("--image", default="1.png")
     parser.add_argument("--model", default="checkpoints/best.pth")
-    parser.add_argument("--model-type", choices=['lightcnn', 'cnn', 'resnet18'], default='resnet18')
+    parser.add_argument("--model-type", choices=['lightcnn', 'cnn', 'cnnv2', 'resnet18'], default='cnnv2')
     parser.add_argument("--threshold", type=float, default=THRESHOLD)
     args = parser.parse_args()
 

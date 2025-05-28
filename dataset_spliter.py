@@ -10,8 +10,8 @@ import random
 SRC_DIR     = "data"
 DST_DIR     = "data_split"
 TRAIN_RATIO = 0.8
-IMG_SIZE    = 128
-TARGET_COUNT = 400
+IMG_SIZE    = 64
+TARGET_COUNT = 4000
 
 transform = A.Compose([
     A.LongestMaxSize(max_size=IMG_SIZE),

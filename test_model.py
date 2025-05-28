@@ -5,7 +5,8 @@ from predict import load_model, preprocess, predict
 from pathlib import Path
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model, classes = load_model("checkpoints/best.pth", device)
+model, classes = load_model("checkpoints/best.pth", device, "cnnv2")
+
 
 df = pd.read_csv("test/labels.csv")
 correct = total = 0
