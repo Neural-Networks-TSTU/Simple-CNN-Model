@@ -35,6 +35,28 @@ An optimized and lightweight version using depthwise separable convolutions and 
 - Global Average Pooling instead of FC layer stack
 - Dropout: 0.2
 
+### 3. ImprovedCNN — Residual SE-Enhanced CNN
+An enhanced convolutional network architecture incorporating residual connections and SE (Squeeze-and-Excitation) attention blocks for improved channel-wise feature recalibration.
+
+**Advantages:**
+
+- Residual blocks mitigate vanishing gradients and help deeper learning
+- SE blocks adaptively emphasize informative features
+- Better generalization with deep yet efficient structure
+- Architecture Highlights:
+- Stem: Conv2D(1 → 32) + BatchNorm + ReLU
+
+**Residual Backbone:**
+
+- 3 stages with 2 ResidualSEBlocks each
+- Channels: 32→64→128→256
+- SE Attention: In each residual block (2×Linear)
+- Fully Connected: Linear(256 → 128 → num_classes)
+- Regularization: Dropout (0.3 × 2)
+- Pooling: AdaptiveAvgPool2D before classification
+
+
+
 ## How to start learning
 
 To train one of the models, run:
